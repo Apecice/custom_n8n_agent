@@ -1,0 +1,116 @@
+{
+  "name": "send a weather email",
+  "nodes": [
+    {
+      "parameters": {
+        "triggerTimes": {
+          "item": [
+            {
+              "hour": 8,
+              "minute": 18
+            }
+          ]
+        }
+      },
+      "name": "Weekly trigger on monday1",
+      "type": "n8n-nodes-base.cron",
+      "position": [
+        -32,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "bb2b37e6-3d8f-4145-ba15-cc325a7a327e"
+    },
+    {
+      "parameters": {
+        "subject": "早上好，亲爱爱的 Apec",
+        "bodyContent": "=Today is  {{ $json.weather[0].description }},\n温度{{ $json.main.temp }} ℃，\n体感温度 {{ $json.main.feels_like }}℃，\n最低温度 {{ $json.main.temp_min }}℃，\n风速 {{ $json.wind.speed }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        368,
+        -16
+      ],
+      "id": "cb7da968-6b95-4ec1-92a4-6deb49deb563",
+      "name": "Send a message",
+      "webhookId": "344e48e6-a474-43a9-a149-378fa33ca201",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "xt9abAvIkU1okowU",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "cityName": "shenzhen",
+        "language": "zh_CN"
+      },
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "4a15e7a7-500f-49fc-b426-74a64f47904e",
+      "name": "OpenWeatherMap",
+      "credentials": {
+        "openWeatherMapApi": {
+          "id": "WKFUJSDYy46W8OyP",
+          "name": "OpenWeatherMap account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## I'm a note \n**FIX ME** the email in the email box below👇."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -208
+      ],
+      "id": "f9403737-c8e4-4286-ae1a-1a129f879e36",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Weekly trigger on monday1": {
+      "main": [
+        [
+          {
+            "node": "OpenWeatherMap",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenWeatherMap": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d5bf20da-1cc0-4ace-8986-082b2d22c7b3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0e7b21e233e67f64422334fb11ca6ba237ef90690f7c70371f55d7f05183ccc"
+  },
+  "id": "QjMpSyJTXSKDmbe7",
+  "tags": []
+}
