@@ -1,0 +1,366 @@
+{
+  "name": "chatHistoryEmail",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -384,
+        -64
+      ],
+      "id": "8ef4be2f-908d-4d36-a751-e7eca60df3d5",
+      "name": "When chat message received",
+      "webhookId": "84947e56-768d-44d4-9746-a7cca8b3fe29"
+    },
+    {
+      "parameters": {
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant;\n你会用英文回答我；\n并且你生成的内容要求markdown格式，如果不是你也会转换成markdown格式"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "cea383f9-dad3-4a51-9b8e-6956fc96ebfd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 200
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        128
+      ],
+      "id": "dd6d8777-31cc-4601-a446-64fbc5780d17",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "qki7nui7GUeDGLn1",
+          "name": "DeepSeek account 3"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        128
+      ],
+      "id": "81e6c2e4-b144-4169-a6d1-bd69c6f306e7",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "content": "## My Thought\n** chat -》 agent-》读取Excel邮箱 -》发送邮箱 -》 存储聊天内容到Excel-sheet2"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -464,
+        -272
+      ],
+      "typeVersion": 1,
+      "id": "38678828-f69a-42e2-8430-1224a06f6874",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $json.email }}",
+        "subject": "Anything Fun",
+        "bodyContent": "={{ $('AI Agent').item.json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlook",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -80
+      ],
+      "id": "252ed6c9-80f7-4be2-9bc7-0d87f735cab6",
+      "name": "Send a message",
+      "webhookId": "f66e8c02-e329-4ece-ad69-db62df218dd8",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "OcFpiEWxGGhavibi",
+          "name": "Microsoft Outlook account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "expression",
+        "numberOutputs": 2,
+        "output": "={{ $json.chatInput.includes(\"保存\") || $json.chatInput.includes(\"save\") }}",
+        "looseTypeValidation": "={{ true }}"
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -208,
+        -64
+      ],
+      "id": "ec89f039-763e-405b-b36f-9e0fcdbad313",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst content = $input.first().json.chatInput\nconst nameMatch = content.match(/姓名[:：]\\s*([^\\s,，]+)/);\nconst emailMatch = content.match(/邮箱[:：]\\s*([^\\s,，]+)/);\nreturn [\n  {\n    json: {\n      name: nameMatch ? nameMatch[1] : '',\n      email: emailMatch ? emailMatch[1] : ''\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        96
+      ],
+      "id": "13608e59-d50a-4171-bf8d-36186c6905f5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1QUDp50w3it9z2kDfaFWRrL_O9w0UonDDVlWIi7xJymY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "PersonInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QUDp50w3it9z2kDfaFWRrL_O9w0UonDDVlWIi7xJymY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "email": "={{ $json.email }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -224,
+        96
+      ],
+      "id": "63524604-beeb-409b-8bfc-65258e72a784",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yDZQpxJxZboR7Aup",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1QUDp50w3it9z2kDfaFWRrL_O9w0UonDDVlWIi7xJymY/edit?gid=0#gid=0",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "PersonInfo",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QUDp50w3it9z2kDfaFWRrL_O9w0UonDDVlWIi7xJymY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "name",
+              "lookupValue": "Kid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        -80
+      ],
+      "id": "51155885-0447-4c7c-9d3c-6f05b1596934",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "yDZQpxJxZboR7Aup",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -80
+      ],
+      "id": "fa55dc50-d3ff-4349-a323-0c5980c99c3c",
+      "name": "Markdown1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Markdown1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a9cad34-7f72-4728-aaa2-fb458f8e3c79",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "a0e7b21e233e67f64422334fb11ca6ba237ef90690f7c70371f55d7f05183ccc"
+  },
+  "id": "rs9wypqtnoSuFgEI",
+  "tags": [
+    {
+      "createdAt": "2025-09-27T12:04:38.763Z",
+      "updatedAt": "2025-09-27T12:04:38.763Z",
+      "id": "EwyFE9OJoAfbDgQU",
+      "name": "email"
+    }
+  ]
+}
