@@ -23,7 +23,7 @@
     },
     {
       "parameters": {
-        "subject": "早上好，亲爱爱的 Apec",
+        "subject": "早上好，亲爱爱的 Kid",
         "bodyContent": "=Today is  {{ $json.weather[0].description }},\n温度{{ $json.main.temp }} ℃，\n体感温度 {{ $json.main.feels_like }}℃，\n最低温度 {{ $json.main.temp_min }}℃，\n风速 {{ $json.wind.speed }}",
         "additionalFields": {}
       },
